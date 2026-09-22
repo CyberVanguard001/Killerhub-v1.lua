@@ -79,7 +79,7 @@ end
 local TEMA = {
     fundo      = Color3.fromRGB(15, 15, 20),
     painel     = Color3.fromRGB(25, 25, 35),
-    destaque   = Color3.fromRGB(220, 40, 60),
+    destaque   = Color3.fromRGB(46, 204, 113), -- Verde principal
     texto      = Color3.fromRGB(240, 240, 245),
     textoFraco = Color3.fromRGB(150, 150, 160),
     verde      = Color3.fromRGB(50, 220, 100),
@@ -91,6 +91,7 @@ local SG = Instance.new("ScreenGui")
 SG.Name = "KillerHubV1"
 SG.ResetOnSpawn = false
 SG.IgnoreGuiInset = true
+SG.DisplayOrder = 999999999 -- Força a UI a ficar acima de tudo na tela
 SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 SG.Parent = player:WaitForChild("PlayerGui")
 
@@ -103,6 +104,7 @@ Main.BorderSizePixel = 0
 Main.Active = true
 Main.Draggable = true
 Main.Visible = false
+Main.ZIndex = 10
 Main.Parent = SG
 
 local MainCorner = Instance.new("UICorner")
@@ -168,7 +170,7 @@ Versao.Parent = Header
 -- Minimizar
 local BtnMin = Instance.new("TextButton")
 BtnMin.Size = UDim2.new(0, 30, 0, 30)
-BtnMin.Position = UDim2.new(1, -78, 0, 12)
+BtnMin.Position = UDim2.new(1, -42, 0, 12)
 BtnMin.BackgroundColor3 = TEMA.fundo
 BtnMin.Text = "—"
 BtnMin.TextColor3 = TEMA.texto
@@ -180,22 +182,6 @@ BtnMin.Parent = Header
 local BtnMinCorner = Instance.new("UICorner")
 BtnMinCorner.CornerRadius = UDim.new(0, 6)
 BtnMinCorner.Parent = BtnMin
-
--- Fechar
-local BtnFechar = Instance.new("TextButton")
-BtnFechar.Size = UDim2.new(0, 30, 0, 30)
-BtnFechar.Position = UDim2.new(1, -42, 0, 12)
-BtnFechar.BackgroundColor3 = TEMA.destaque
-BtnFechar.Text = "✕"
-BtnFechar.TextColor3 = TEMA.texto
-BtnFechar.Font = Enum.Font.GothamBold
-BtnFechar.TextSize = 14
-BtnFechar.AutoButtonColor = false
-BtnFechar.Parent = Header
-
-local BtnFecharCorner = Instance.new("UICorner")
-BtnFecharCorner.CornerRadius = UDim.new(0, 6)
-BtnFecharCorner.Parent = BtnFechar
 
 -- ==================== BOTÃO EXECUTAR ====================
 local BtnExecutar = Instance.new("TextButton")
@@ -213,10 +199,10 @@ local BtnExecutarCorner = Instance.new("UICorner")
 BtnExecutarCorner.CornerRadius = UDim.new(0, 10)
 BtnExecutarCorner.Parent = BtnExecutar
 
--- Hover
+-- Hover (Tom de verde mais escuro no passe do mouse)
 BtnExecutar.MouseEnter:Connect(function()
     TweenService:Create(BtnExecutar, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(180, 30, 50)
+        BackgroundColor3 = Color3.fromRGB(35, 160, 90)
     }):Play()
 end)
 BtnExecutar.MouseLeave:Connect(function()
@@ -264,6 +250,7 @@ BtnFloat.TextColor3 = TEMA.texto
 BtnFloat.Font = Enum.Font.GothamBlack
 BtnFloat.TextSize = 24
 BtnFloat.AutoButtonColor = false
+BtnFloat.ZIndex = 10
 BtnFloat.Parent = SG
 
 local BtnFloatCorner = Instance.new("UICorner")
@@ -286,32 +273,42 @@ task.spawn(function()
     end
 end)
 
--- Arrastar
-local arrastando = false
-local offset = Vector2.new()
+-- ==================== LÓGICA DE ARRASTAR CORRIGIDA ====================
+local dragando = false
+local movendo = false
+local dragStart = nil
+local startPos = nil
 
 BtnFloat.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch 
-    or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        arrastando = true
-        offset = Vector2.new(
-            input.Position.X - BtnFloat.AbsolutePosition.X,
-            input.Position.Y - BtnFloat.AbsolutePosition.Y
-        )
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragando = true
+        movendo = false
+        dragStart = input.Position
+        startPos = BtnFloat.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragando = false
+            end
+        end)
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if arrastando and (input.UserInputType == Enum.UserInputType.Touch 
-    or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        BtnFloat.Position = UDim2.new(0, input.Position.X - offset.X, 0, input.Position.Y - offset.Y)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch 
-    or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        arrastando = false
+BtnFloat.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if dragando then
+            local delta = input.Position - dragStart
+            -- Previne que um clique simples seja lido como arraste
+            if delta.Magnitude > 5 then
+                movendo = true
+            end
+            if movendo then
+                BtnFloat.Position = UDim2.new(
+                    startPos.X.Scale, startPos.X.Offset + delta.X,
+                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
+                )
+            end
+        end
     end
 end)
 
@@ -346,11 +343,13 @@ local function fechar()
 end
 
 BtnFloat.MouseButton1Click:Connect(function()
-    if not arrastando then abrir() end
+    -- Só abre se o mouse NÃO tiver sido arrastado
+    if not movendo then 
+        abrir() 
+    end
 end)
 
 BtnMin.MouseButton1Click:Connect(fechar)
-BtnFechar.MouseButton1Click:Connect(fechar)
 
 -- Atalho K
 UserInputService.InputBegan:Connect(function(input, gp)
