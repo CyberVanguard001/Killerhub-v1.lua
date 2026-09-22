@@ -1,0 +1,367 @@
+-- =====================================================
+-- KILLER HUB V1
+-- Botão único: executa a gravação 1 vez por clique
+-- =====================================================
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- ==================== GRAVAÇÃO ====================
+local gravacao = {
+  {tempo=0.301, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.317, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.320, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.332, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.335, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.345, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.349, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.358, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.361, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.369, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.372, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.384, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.388, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.407, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.419, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.451, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.457, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.477, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.489, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.499, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.502, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.511, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.514, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.563, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.639, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.714, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.730, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.743, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.767, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.803, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.818, x=946.14,  y=70.58, z=-332.05},
+}
+
+-- ==================== EXECUTAR 1 VEZ ====================
+local executando = false
+
+local function executarUmaVez()
+    if executando then return end
+    executando = true
+    
+    task.spawn(function()
+        local inicio = tick()
+        
+        for i, ev in ipairs(gravacao) do
+            local char = player.Character
+            if not char then break end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then break end
+            
+            -- Espera o tempo exato da gravação
+            local decorrido = tick() - inicio
+            local espera = ev.tempo - decorrido
+            if espera > 0 then
+                task.wait(espera)
+            end
+            
+            -- Aplica o CFrame
+            hrp.CFrame = CFrame.new(ev.x, ev.y, ev.z)
+        end
+        
+        executando = false
+    end)
+end
+
+-- ==================== TEMA ====================
+local TEMA = {
+    fundo      = Color3.fromRGB(15, 15, 20),
+    painel     = Color3.fromRGB(25, 25, 35),
+    destaque   = Color3.fromRGB(220, 40, 60),
+    texto      = Color3.fromRGB(240, 240, 245),
+    textoFraco = Color3.fromRGB(150, 150, 160),
+    verde      = Color3.fromRGB(50, 220, 100),
+    borda      = Color3.fromRGB(45, 45, 60),
+}
+
+-- ==================== GUI ====================
+local SG = Instance.new("ScreenGui")
+SG.Name = "KillerHubV1"
+SG.ResetOnSpawn = false
+SG.IgnoreGuiInset = true
+SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SG.Parent = player:WaitForChild("PlayerGui")
+
+-- ==================== FRAME PRINCIPAL ====================
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 300, 0, 180)
+Main.Position = UDim2.new(0.5, -150, 0.5, -90)
+Main.BackgroundColor3 = TEMA.fundo
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Main.Visible = false
+Main.Parent = SG
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = Main
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = TEMA.borda
+MainStroke.Thickness = 1.5
+MainStroke.Parent = Main
+
+-- HEADER
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 55)
+Header.BackgroundColor3 = TEMA.painel
+Header.BorderSizePixel = 0
+Header.Parent = Main
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.Parent = Header
+
+local HeaderFix = Instance.new("Frame")
+HeaderFix.Size = UDim2.new(1, 0, 0, 12)
+HeaderFix.Position = UDim2.new(0, 0, 1, -12)
+HeaderFix.BackgroundColor3 = TEMA.painel
+HeaderFix.BorderSizePixel = 0
+HeaderFix.Parent = Header
+
+local LinhaDecor = Instance.new("Frame")
+LinhaDecor.Size = UDim2.new(0, 4, 0, 35)
+LinhaDecor.Position = UDim2.new(0, 12, 0.5, -17)
+LinhaDecor.BackgroundColor3 = TEMA.destaque
+LinhaDecor.BorderSizePixel = 0
+LinhaDecor.Parent = Header
+
+local LinhaDecorCorner = Instance.new("UICorner")
+LinhaDecorCorner.CornerRadius = UDim.new(0, 2)
+LinhaDecorCorner.Parent = LinhaDecor
+
+local Logo = Instance.new("TextLabel")
+Logo.Size = UDim2.new(0, 200, 0, 22)
+Logo.Position = UDim2.new(0, 24, 0, 10)
+Logo.BackgroundTransparency = 1
+Logo.Text = "KILLER HUB"
+Logo.TextColor3 = TEMA.texto
+Logo.Font = Enum.Font.GothamBlack
+Logo.TextSize = 18
+Logo.TextXAlignment = Enum.TextXAlignment.Left
+Logo.Parent = Header
+
+local Versao = Instance.new("TextLabel")
+Versao.Size = UDim2.new(0, 200, 0, 15)
+Versao.Position = UDim2.new(0, 25, 0, 32)
+Versao.BackgroundTransparency = 1
+Versao.Text = "By KILLER | v1.0"
+Versao.TextColor3 = TEMA.textoFraco
+Versao.Font = Enum.Font.Gotham
+Versao.TextSize = 10
+Versao.TextXAlignment = Enum.TextXAlignment.Left
+Versao.Parent = Header
+
+-- Minimizar
+local BtnMin = Instance.new("TextButton")
+BtnMin.Size = UDim2.new(0, 30, 0, 30)
+BtnMin.Position = UDim2.new(1, -78, 0, 12)
+BtnMin.BackgroundColor3 = TEMA.fundo
+BtnMin.Text = "—"
+BtnMin.TextColor3 = TEMA.texto
+BtnMin.Font = Enum.Font.GothamBold
+BtnMin.TextSize = 18
+BtnMin.AutoButtonColor = false
+BtnMin.Parent = Header
+
+local BtnMinCorner = Instance.new("UICorner")
+BtnMinCorner.CornerRadius = UDim.new(0, 6)
+BtnMinCorner.Parent = BtnMin
+
+-- Fechar
+local BtnFechar = Instance.new("TextButton")
+BtnFechar.Size = UDim2.new(0, 30, 0, 30)
+BtnFechar.Position = UDim2.new(1, -42, 0, 12)
+BtnFechar.BackgroundColor3 = TEMA.destaque
+BtnFechar.Text = "✕"
+BtnFechar.TextColor3 = TEMA.texto
+BtnFechar.Font = Enum.Font.GothamBold
+BtnFechar.TextSize = 14
+BtnFechar.AutoButtonColor = false
+BtnFechar.Parent = Header
+
+local BtnFecharCorner = Instance.new("UICorner")
+BtnFecharCorner.CornerRadius = UDim.new(0, 6)
+BtnFecharCorner.Parent = BtnFechar
+
+-- ==================== BOTÃO EXECUTAR ====================
+local BtnExecutar = Instance.new("TextButton")
+BtnExecutar.Size = UDim2.new(1, -30, 0, 55)
+BtnExecutar.Position = UDim2.new(0, 15, 0, 75)
+BtnExecutar.BackgroundColor3 = TEMA.destaque
+BtnExecutar.Text = "▶ BUGAR BOSS"
+BtnExecutar.TextColor3 = TEMA.texto
+BtnExecutar.Font = Enum.Font.GothamBlack
+BtnExecutar.TextSize = 18
+BtnExecutar.AutoButtonColor = false
+BtnExecutar.Parent = Main
+
+local BtnExecutarCorner = Instance.new("UICorner")
+BtnExecutarCorner.CornerRadius = UDim.new(0, 10)
+BtnExecutarCorner.Parent = BtnExecutar
+
+-- Hover
+BtnExecutar.MouseEnter:Connect(function()
+    TweenService:Create(BtnExecutar, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(180, 30, 50)
+    }):Play()
+end)
+BtnExecutar.MouseLeave:Connect(function()
+    TweenService:Create(BtnExecutar, TweenInfo.new(0.2), {
+        BackgroundColor3 = TEMA.destaque
+    }):Play()
+end)
+
+-- Status
+local Status = Instance.new("TextLabel")
+Status.Size = UDim2.new(1, -30, 0, 25)
+Status.Position = UDim2.new(0, 15, 0, 140)
+Status.BackgroundTransparency = 1
+Status.Text = "Pronto"
+Status.TextColor3 = TEMA.textoFraco
+Status.Font = Enum.Font.Gotham
+Status.TextSize = 11
+Status.Parent = Main
+
+-- ==================== LÓGICA DO BOTÃO ====================
+BtnExecutar.MouseButton1Click:Connect(function()
+    if executando then
+        Status.Text = "⏳ Bugando..."
+        Status.TextColor3 = TEMA.destaque
+        return
+    end
+    
+    Status.Text = "🟢 Bugando..."
+    Status.TextColor3 = TEMA.verde
+    
+    executarUmaVez()
+    
+    task.wait(1)
+    Status.Text = "Pronto"
+    Status.TextColor3 = TEMA.textoFraco
+end)
+
+-- ==================== BOTÃO FLUTUANTE ====================
+local BtnFloat = Instance.new("TextButton")
+BtnFloat.Size = UDim2.new(0, 60, 0, 60)
+BtnFloat.Position = UDim2.new(0, 20, 0.5, -30)
+BtnFloat.BackgroundColor3 = TEMA.destaque
+BtnFloat.Text = "K"
+BtnFloat.TextColor3 = TEMA.texto
+BtnFloat.Font = Enum.Font.GothamBlack
+BtnFloat.TextSize = 24
+BtnFloat.AutoButtonColor = false
+BtnFloat.Parent = SG
+
+local BtnFloatCorner = Instance.new("UICorner")
+BtnFloatCorner.CornerRadius = UDim.new(0, 30)
+BtnFloatCorner.Parent = BtnFloat
+
+local BtnFloatStroke = Instance.new("UIStroke")
+BtnFloatStroke.Color = Color3.fromRGB(255, 255, 255)
+BtnFloatStroke.Thickness = 2
+BtnFloatStroke.Transparency = 0.5
+BtnFloatStroke.Parent = BtnFloat
+
+-- Pulse
+task.spawn(function()
+    while BtnFloat.Parent do
+        TweenService:Create(BtnFloatStroke, TweenInfo.new(1), {Transparency = 0.9}):Play()
+        task.wait(1)
+        TweenService:Create(BtnFloatStroke, TweenInfo.new(1), {Transparency = 0.5}):Play()
+        task.wait(1)
+    end
+end)
+
+-- Arrastar
+local arrastando = false
+local offset = Vector2.new()
+
+BtnFloat.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        arrastando = true
+        offset = Vector2.new(
+            input.Position.X - BtnFloat.AbsolutePosition.X,
+            input.Position.Y - BtnFloat.AbsolutePosition.Y
+        )
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if arrastando and (input.UserInputType == Enum.UserInputType.Touch 
+    or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        BtnFloat.Position = UDim2.new(0, input.Position.X - offset.X, 0, input.Position.Y - offset.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        arrastando = false
+    end
+end)
+
+-- ==================== ABRIR/FECHAR ====================
+local aberto = false
+
+local function abrir()
+    if aberto then return end
+    aberto = true
+    BtnFloat.Visible = false
+    Main.Visible = true
+    Main.Size = UDim2.new(0, 0, 0, 0)
+    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+        Size = UDim2.new(0, 300, 0, 180),
+        Position = UDim2.new(0.5, -150, 0.5, -90)
+    }):Play()
+end
+
+local function fechar()
+    if not aberto then return end
+    aberto = false
+    local tween = TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    })
+    tween:Play()
+    tween.Completed:Connect(function()
+        Main.Visible = false
+        BtnFloat.Visible = true
+    end)
+end
+
+BtnFloat.MouseButton1Click:Connect(function()
+    if not arrastando then abrir() end
+end)
+
+BtnMin.MouseButton1Click:Connect(fechar)
+BtnFechar.MouseButton1Click:Connect(fechar)
+
+-- Atalho K
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.K then
+        if aberto then fechar() else abrir() end
+    end
+end)
+
+-- Abre automático
+task.wait(1)
+abrir()
+
+print("✅ KILLER HUB V1 carregado!")
