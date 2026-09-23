@@ -90,7 +90,7 @@ end)
 -- ==================== VARIAVEIS PINBALL ====================
 local posicaoSalva = nil
 local andando = false
-local VELOCIDADE = 180
+local VELOCIDADE = 1300
 local VEL_LATERAL = 250
 local DETECCAO_PAREDE = 8
 local TEMPO_ENTRE_TROCA = 0.3
