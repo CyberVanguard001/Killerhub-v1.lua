@@ -1,15 +1,24 @@
 -- =====================================================
--- KILLER HUB V1
--- Botão único: executa a gravação 1 vez por clique
+-- KILLER HUB V1 - DUAS UIs
+-- Aba 1: Auto Base (Pinball)
+-- Aba 2: Bugar Boss (Gravação)
 -- =====================================================
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-
 local player = Players.LocalPlayer
 
--- ==================== GRAVAÇÃO ====================
+-- ==================== VARIAVEIS PINBALL ====================
+local posicaoSalva = nil
+local andando = false
+local VELOCIDADE = 180
+local VEL_LATERAL = 250
+local DETECCAO_PAREDE = 8
+local TEMPO_ENTRE_TROCA = 0.3
+
+-- ==================== GRAVACAO (Bugar Boss) ====================
 local gravacao = {
   {tempo=0.301, x=512.73,  y=70.58, z=-362.57},
   {tempo=0.317, x=946.14,  y=70.58, z=-332.05},
@@ -44,7 +53,7 @@ local gravacao = {
   {tempo=0.818, x=946.14,  y=70.58, z=-332.05},
 }
 
--- ==================== EXECUTAR 1 VEZ ====================
+-- ==================== VARIAVEIS BUGAR BOSS ====================
 local executando = false
 
 local function executarUmaVez()
@@ -60,14 +69,12 @@ local function executarUmaVez()
             local hrp = char:FindFirstChild("HumanoidRootPart")
             if not hrp then break end
             
-            -- Espera o tempo exato da gravação
             local decorrido = tick() - inicio
             local espera = ev.tempo - decorrido
             if espera > 0 then
                 task.wait(espera)
             end
             
-            -- Aplica o CFrame
             hrp.CFrame = CFrame.new(ev.x, ev.y, ev.z)
         end
         
@@ -79,26 +86,27 @@ end
 local TEMA = {
     fundo      = Color3.fromRGB(15, 15, 20),
     painel     = Color3.fromRGB(25, 25, 35),
-    destaque   = Color3.fromRGB(46, 204, 113), -- Verde principal
+    destaque   = Color3.fromRGB(46, 204, 113),
+    vermelho   = Color3.fromRGB(220, 40, 60),
     texto      = Color3.fromRGB(240, 240, 245),
     textoFraco = Color3.fromRGB(150, 150, 160),
     verde      = Color3.fromRGB(50, 220, 100),
     borda      = Color3.fromRGB(45, 45, 60),
 }
 
--- ==================== GUI ====================
+-- ==================== GUI PRINCIPAL ====================
 local SG = Instance.new("ScreenGui")
 SG.Name = "KillerHubV1"
 SG.ResetOnSpawn = false
 SG.IgnoreGuiInset = true
-SG.DisplayOrder = 999999999 -- Força a UI a ficar acima de tudo na tela
+SG.DisplayOrder = 999999999
 SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 SG.Parent = player:WaitForChild("PlayerGui")
 
--- ==================== FRAME PRINCIPAL ====================
+-- Frame principal
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 300, 0, 180)
-Main.Position = UDim2.new(0.5, -150, 0.5, -90)
+Main.Size = UDim2.new(0, 300, 0, 220)
+Main.Position = UDim2.new(0.5, -150, 0.5, -110)
 Main.BackgroundColor3 = TEMA.fundo
 Main.BorderSizePixel = 0
 Main.Active = true
@@ -160,14 +168,13 @@ local Versao = Instance.new("TextLabel")
 Versao.Size = UDim2.new(0, 200, 0, 15)
 Versao.Position = UDim2.new(0, 25, 0, 32)
 Versao.BackgroundTransparency = 1
-Versao.Text = "By KILLER | v1.0"
+Versao.Text = "By KILLER | v2.0"
 Versao.TextColor3 = TEMA.textoFraco
 Versao.Font = Enum.Font.Gotham
 Versao.TextSize = 10
 Versao.TextXAlignment = Enum.TextXAlignment.Left
 Versao.Parent = Header
 
--- Minimizar
 local BtnMin = Instance.new("TextButton")
 BtnMin.Size = UDim2.new(0, 30, 0, 30)
 BtnMin.Position = UDim2.new(1, -42, 0, 12)
@@ -183,23 +190,120 @@ local BtnMinCorner = Instance.new("UICorner")
 BtnMinCorner.CornerRadius = UDim.new(0, 6)
 BtnMinCorner.Parent = BtnMin
 
--- ==================== BOTÃO EXECUTAR ====================
+-- ==================== ABAS (TABS) ====================
+local TabFrame = Instance.new("Frame")
+TabFrame.Size = UDim2.new(1, -20, 0, 30)
+TabFrame.Position = UDim2.new(0, 10, 0, 62)
+TabFrame.BackgroundTransparency = 1
+TabFrame.Parent = Main
+
+local BtnTab1 = Instance.new("TextButton")
+BtnTab1.Size = UDim2.new(0.5, -5, 1, 0)
+BtnTab1.Position = UDim2.new(0, 0, 0, 0)
+BtnTab1.BackgroundColor3 = TEMA.destaque
+BtnTab1.Text = "🏠 AUTO BASE"
+BtnTab1.TextColor3 = TEMA.texto
+BtnTab1.Font = Enum.Font.GothamBold
+BtnTab1.TextSize = 12
+BtnTab1.AutoButtonColor = false
+BtnTab1.Parent = TabFrame
+
+local BtnTab1Corner = Instance.new("UICorner")
+BtnTab1Corner.CornerRadius = UDim.new(0, 6)
+BtnTab1Corner.Parent = BtnTab1
+
+local BtnTab2 = Instance.new("TextButton")
+BtnTab2.Size = UDim2.new(0.5, -5, 1, 0)
+BtnTab2.Position = UDim2.new(0.5, 5, 0, 0)
+BtnTab2.BackgroundColor3 = TEMA.fundo
+BtnTab2.Text = "👹 BUGAR BOSS"
+BtnTab2.TextColor3 = TEMA.textoFraco
+BtnTab2.Font = Enum.Font.GothamBold
+BtnTab2.TextSize = 12
+BtnTab2.AutoButtonColor = false
+BtnTab2.Parent = TabFrame
+
+local BtnTab2Corner = Instance.new("UICorner")
+BtnTab2Corner.CornerRadius = UDim.new(0, 6)
+BtnTab2Corner.Parent = BtnTab2
+
+-- ==================== ABA 1: AUTO BASE (PINBALL) ====================
+local Aba1 = Instance.new("Frame")
+Aba1.Size = UDim2.new(1, -20, 1, -105)
+Aba1.Position = UDim2.new(0, 10, 0, 98)
+Aba1.BackgroundTransparency = 1
+Aba1.Visible = true
+Aba1.Parent = Main
+
+local BtnSalvar = Instance.new("TextButton")
+BtnSalvar.Size = UDim2.new(0, 130, 0, 35)
+BtnSalvar.Position = UDim2.new(0, 0, 0, 0)
+BtnSalvar.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+BtnSalvar.Text = "SALVAR"
+BtnSalvar.TextColor3 = TEMA.texto
+BtnSalvar.Font = Enum.Font.GothamBold
+BtnSalvar.TextSize = 12
+BtnSalvar.AutoButtonColor = false
+BtnSalvar.Parent = Aba1
+
+local BtnSalvarCorner = Instance.new("UICorner")
+BtnSalvarCorner.CornerRadius = UDim.new(0, 8)
+BtnSalvarCorner.Parent = BtnSalvar
+
+local BtnGo = Instance.new("TextButton")
+BtnGo.Size = UDim2.new(0, 130, 0, 35)
+BtnGo.Position = UDim2.new(1, -130, 0, 0)
+BtnGo.BackgroundColor3 = TEMA.destaque
+BtnGo.Text = "GO"
+BtnGo.TextColor3 = TEMA.texto
+BtnGo.Font = Enum.Font.GothamBold
+BtnGo.TextSize = 14
+BtnGo.AutoButtonColor = false
+BtnGo.Parent = Aba1
+
+local BtnGoCorner = Instance.new("UICorner")
+BtnGoCorner.CornerRadius = UDim.new(0, 8)
+BtnGoCorner.Parent = BtnGo
+
+local Status1 = Instance.new("TextLabel")
+Status1.Size = UDim2.new(1, 0, 0, 50)
+Status1.Position = UDim2.new(0, 0, 0, 45)
+Status1.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+Status1.BorderSizePixel = 0
+Status1.Text = "Nenhuma posição salva"
+Status1.TextColor3 = TEMA.textoFraco
+Status1.Font = Enum.Font.Gotham
+Status1.TextSize = 11
+Status1.TextWrapped = true
+Status1.Parent = Aba1
+
+local Status1Corner = Instance.new("UICorner")
+Status1Corner.CornerRadius = UDim.new(0, 8)
+Status1Corner.Parent = Status1
+
+-- ==================== ABA 2: BUGAR BOSS ====================
+local Aba2 = Instance.new("Frame")
+Aba2.Size = UDim2.new(1, -20, 1, -105)
+Aba2.Position = UDim2.new(0, 10, 0, 98)
+Aba2.BackgroundTransparency = 1
+Aba2.Visible = false
+Aba2.Parent = Main
+
 local BtnExecutar = Instance.new("TextButton")
-BtnExecutar.Size = UDim2.new(1, -30, 0, 55)
-BtnExecutar.Position = UDim2.new(0, 15, 0, 75)
+BtnExecutar.Size = UDim2.new(1, 0, 0, 55)
+BtnExecutar.Position = UDim2.new(0, 0, 0, 0)
 BtnExecutar.BackgroundColor3 = TEMA.destaque
-BtnExecutar.Text = "▶ BUGAR BOSS"
+BtnExecutar.Text = "BUGAR BOSS"
 BtnExecutar.TextColor3 = TEMA.texto
 BtnExecutar.Font = Enum.Font.GothamBlack
 BtnExecutar.TextSize = 18
 BtnExecutar.AutoButtonColor = false
-BtnExecutar.Parent = Main
+BtnExecutar.Parent = Aba2
 
 local BtnExecutarCorner = Instance.new("UICorner")
 BtnExecutarCorner.CornerRadius = UDim.new(0, 10)
 BtnExecutarCorner.Parent = BtnExecutar
 
--- Hover (Tom de verde mais escuro no passe do mouse)
 BtnExecutar.MouseEnter:Connect(function()
     TweenService:Create(BtnExecutar, TweenInfo.new(0.2), {
         BackgroundColor3 = Color3.fromRGB(35, 160, 90)
@@ -211,34 +315,42 @@ BtnExecutar.MouseLeave:Connect(function()
     }):Play()
 end)
 
--- Status
-local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -30, 0, 25)
-Status.Position = UDim2.new(0, 15, 0, 140)
-Status.BackgroundTransparency = 1
-Status.Text = "Pronto"
-Status.TextColor3 = TEMA.textoFraco
-Status.Font = Enum.Font.Gotham
-Status.TextSize = 11
-Status.Parent = Main
+local Status2 = Instance.new("TextLabel")
+Status2.Size = UDim2.new(1, 0, 0, 25)
+Status2.Position = UDim2.new(0, 0, 0, 65)
+Status2.BackgroundTransparency = 1
+Status2.Text = "Pronto"
+Status2.TextColor3 = TEMA.textoFraco
+Status2.Font = Enum.Font.Gotham
+Status2.TextSize = 11
+Status2.Parent = Aba2
 
--- ==================== LÓGICA DO BOTÃO ====================
-BtnExecutar.MouseButton1Click:Connect(function()
-    if executando then
-        Status.Text = "⏳ Bugando..."
-        Status.TextColor3 = TEMA.destaque
-        return
+-- ==================== TROCA DE ABAS ====================
+local abaAtual = 1
+
+local function trocarAba(nova)
+    if abaAtual == nova then return end
+    abaAtual = nova
+    
+    if nova == 1 then
+        Aba1.Visible = true
+        Aba2.Visible = false
+        BtnTab1.BackgroundColor3 = TEMA.destaque
+        BtnTab1.TextColor3 = TEMA.texto
+        BtnTab2.BackgroundColor3 = TEMA.fundo
+        BtnTab2.TextColor3 = TEMA.textoFraco
+    else
+        Aba1.Visible = false
+        Aba2.Visible = true
+        BtnTab1.BackgroundColor3 = TEMA.fundo
+        BtnTab1.TextColor3 = TEMA.textoFraco
+        BtnTab2.BackgroundColor3 = TEMA.destaque
+        BtnTab2.TextColor3 = TEMA.texto
     end
-    
-    Status.Text = "🟢 Bugando..."
-    Status.TextColor3 = TEMA.verde
-    
-    executarUmaVez()
-    
-    task.wait(1)
-    Status.Text = "Pronto"
-    Status.TextColor3 = TEMA.textoFraco
-end)
+end
+
+BtnTab1.MouseButton1Click:Connect(function() trocarAba(1) end)
+BtnTab2.MouseButton1Click:Connect(function() trocarAba(2) end)
 
 -- ==================== BOTÃO FLUTUANTE ====================
 local BtnFloat = Instance.new("TextButton")
@@ -263,7 +375,6 @@ BtnFloatStroke.Thickness = 2
 BtnFloatStroke.Transparency = 0.5
 BtnFloatStroke.Parent = BtnFloat
 
--- Pulse
 task.spawn(function()
     while BtnFloat.Parent do
         TweenService:Create(BtnFloatStroke, TweenInfo.new(1), {Transparency = 0.9}):Play()
@@ -273,7 +384,6 @@ task.spawn(function()
     end
 end)
 
--- ==================== LÓGICA DE ARRASTAR CORRIGIDA ====================
 local dragando = false
 local movendo = false
 local dragStart = nil
@@ -285,7 +395,6 @@ BtnFloat.InputBegan:Connect(function(input)
         movendo = false
         dragStart = input.Position
         startPos = BtnFloat.Position
-
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragando = false
@@ -298,10 +407,7 @@ BtnFloat.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         if dragando then
             local delta = input.Position - dragStart
-            -- Previne que um clique simples seja lido como arraste
-            if delta.Magnitude > 5 then
-                movendo = true
-            end
+            if delta.Magnitude > 5 then movendo = true end
             if movendo then
                 BtnFloat.Position = UDim2.new(
                     startPos.X.Scale, startPos.X.Offset + delta.X,
@@ -323,8 +429,8 @@ local function abrir()
     Main.Size = UDim2.new(0, 0, 0, 0)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-        Size = UDim2.new(0, 300, 0, 180),
-        Position = UDim2.new(0.5, -150, 0.5, -90)
+        Size = UDim2.new(0, 300, 0, 220),
+        Position = UDim2.new(0.5, -150, 0.5, -110)
     }):Play()
 end
 
@@ -343,15 +449,11 @@ local function fechar()
 end
 
 BtnFloat.MouseButton1Click:Connect(function()
-    -- Só abre se o mouse NÃO tiver sido arrastado
-    if not movendo then 
-        abrir() 
-    end
+    if not movendo then abrir() end
 end)
 
 BtnMin.MouseButton1Click:Connect(fechar)
 
--- Atalho K
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.K then
@@ -359,8 +461,143 @@ UserInputService.InputBegan:Connect(function(input, gp)
     end
 end)
 
+-- ==================== LOGICA PINBALL ====================
+BtnSalvar.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    posicaoSalva = Vector3.new(hrp.Position.X, hrp.Position.Y, hrp.Position.Z)
+    Status1.Text = "Salvo!\nX:" .. math.floor(posicaoSalva.X) .. " Z:" .. math.floor(posicaoSalva.Z)
+    Status1.TextColor3 = TEMA.verde
+    
+    task.wait(2)
+    Status1.Text = "Posição salva e pronta"
+    Status1.TextColor3 = TEMA.textoFraco
+end)
+
+local function temParedeNaFrente(origem, direcao, distancia)
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = {player.Character}
+    rayParams.IgnoreWater = true
+    
+    local resultado = workspace:Raycast(origem, direcao * distancia, rayParams)
+    return resultado ~= nil
+end
+
+local function andarPinball()
+    if andando then return end
+    if not posicaoSalva then
+        Status1.Text = "Salve uma posição primeiro!"
+        Status1.TextColor3 = Color3.fromRGB(255, 80, 80)
+        return
+    end
+    
+    andando = true
+    BtnGo.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+    BtnGo.Text = "PARAR"
+    Status1.Text = "Auto Base ativado!"
+    Status1.TextColor3 = TEMA.verde
+    
+    task.spawn(function()
+        local ladoAtual = 1
+        local tempoUltimaTroca = 0
+        
+        while andando do
+            local char = player.Character
+            if not char then break end
+            
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then break end
+            
+            local posAtual = hrp.Position
+            local direcao = posicaoSalva - posAtual
+            local distancia = direcao.Magnitude
+            
+            if distancia < 5 then
+                hrp.CFrame = CFrame.new(posicaoSalva)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                break
+            end
+            
+            local dirXZ = Vector3.new(direcao.X, 0, direcao.Z)
+            if dirXZ.Magnitude < 0.01 then break end
+            local dirUnit = dirXZ.Unit
+            
+            local lateral = Vector3.new(-dirUnit.Z, 0, dirUnit.X)
+            
+            local direcaoLateral = lateral * ladoAtual
+            local temParede = temParedeNaFrente(posAtual, direcaoLateral, DETECCAO_PAREDE)
+            
+            local agora = tick()
+            if temParede and (agora - tempoUltimaTroca) > TEMPO_ENTRE_TROCA then
+                ladoAtual = -ladoAtual
+                tempoUltimaTroca = agora
+            end
+            
+            local velocity = Vector3.new(
+                (dirUnit.X * VELOCIDADE) + (lateral.X * ladoAtual * VEL_LATERAL),
+                0,
+                (dirUnit.Z * VELOCIDADE) + (lateral.Z * ladoAtual * VEL_LATERAL)
+            )
+            
+            hrp.AssemblyLinearVelocity = velocity
+            
+            if math.random() < 0.1 then
+                local paredeStatus = temParede and " " or ""
+                local ladoTexto = ladoAtual == 1 and "→" or "←"
+                Status1.Text = " " .. math.floor(distancia) .. " Pasos " .. ladoTexto .. paredeStatus
+            end
+            
+            task.wait()
+        end
+        
+        andando = false
+        BtnGo.BackgroundColor3 = TEMA.destaque
+        BtnGo.Text = "GO"
+        Status1.Text = "Chegou no destino!"
+        Status1.TextColor3 = TEMA.verde
+        
+        task.wait(2)
+        Status1.Text = "Posição salva e pronta"
+        Status1.TextColor3 = TEMA.textoFraco
+    end)
+end
+
+BtnGo.MouseButton1Click:Connect(function()
+    if andando then
+        andando = false
+        BtnGo.BackgroundColor3 = TEMA.destaque
+        BtnGo.Text = "GO"
+        Status1.Text = "Parado"
+        Status1.TextColor3 = TEMA.textoFraco
+    else
+        andarPinball()
+    end
+end)
+
+-- ==================== LOGICA BUGAR BOSS ====================
+BtnExecutar.MouseButton1Click:Connect(function()
+    if executando then
+        Status2.Text = "Bugando..."
+        Status2.TextColor3 = TEMA.destaque
+        return
+    end
+    
+    Status2.Text = "Bugando..."
+    Status2.TextColor3 = TEMA.verde
+    
+    executarUmaVez()
+    
+    task.wait(1)
+    Status2.Text = "Pronto"
+    Status2.TextColor3 = TEMA.textoFraco
+end)
+
 -- Abre automático
 task.wait(1)
 abrir()
 
-print("✅ KILLER HUB V1 carregado!")
+print("✅ KILLER HUB V2 carregado!")
