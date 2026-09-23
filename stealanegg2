@@ -1,0 +1,680 @@
+-- =====================================================
+-- KILLER HUB V2 - COM MIRANDA AFK E CORREÇÃO DE INTERAÇÃO (E)
+-- Aba 1: Auto Base (Pinball)
+-- Aba 2: Bugar Boss (Gravação)
+-- =====================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+-- ==================== OCULTADOR INTELIGENTE DE HUBS (PROTEGE O JOGO) ====================
+-- Nomes e termos de interfaces do JOGO/ROBLOX que NUNCA devem ser apagados
+local preservar = {
+    "killerhubv1", "roblox", "chat", "core", "prompt", "interact", 
+    "hold", "press", "action", "hud", "inventory", "item", "pickup",
+    "proximity", "dialog", "bar", "health", "stamina"
+}
+
+-- Nomes e termos de HUBS/SCRIPTS para esconder
+local termosHubs = {
+    "miranda", "foxname", "orion", "rayfield", "kavo", "fluent", 
+    "windui", "venom", "loader", "hub", "uilib", "library"
+}
+
+local function devePreservar(nome)
+    local n = nome:lower()
+    for _, termo in ipairs(preservar) do
+        if n:find(termo) then
+            return true
+        end
+    end
+    return false
+end
+
+local function ehHubSecundario(nome)
+    local n = nome:lower()
+    for _, termo in ipairs(termosHubs) do
+        if n:find(termo) then
+            return true
+        end
+    end
+    return false
+end
+
+local function esconderOuDestruirUI(parent, ehCoreGui)
+    if not parent then return end
+    for _, gui in ipairs(parent:GetChildren()) do
+        if gui:IsA("ScreenGui") and not devePreservar(gui.Name) then
+            -- Se for no CoreGui/gethui OU se tiver nome de hub conhecido no PlayerGui
+            if ehCoreGui or ehHubSecundario(gui.Name) then
+                pcall(function()
+                    gui.Enabled = false
+                    for _, child in ipairs(gui:GetDescendants()) do
+                        if child:IsA("GuiObject") then
+                            child.Visible = false
+                            child.Size = UDim2.new(0, 0, 0, 0)
+                        end
+                    end
+                    gui:Destroy()
+                end)
+            end
+        end
+    end
+end
+
+-- Varredura contínua segura em segundo plano
+task.spawn(function()
+    while task.wait(0.2) do
+        pcall(function()
+            -- Limpa apenas hubs no PlayerGui sem mexer nas interações do jogo
+            local pGui = player:FindFirstChild("PlayerGui")
+            if pGui then esconderOuDestruirUI(pGui, false) end
+            
+            -- Limpa no CoreGui / gethui (onde injetores colocam telas de hubs)
+            local hui = (gethui and gethui()) or game:GetService("CoreGui")
+            if hui then esconderOuDestruirUI(hui, true) end
+        end)
+    end
+end)
+
+-- ==================== EXECUÇÃO DO HUB SECUNDÁRIO (MIRANDA AFK) ====================
+task.spawn(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/miirandahub/loader/refs/heads/main/mirandaafk.lua"))()
+    end)
+end)
+
+-- ==================== VARIAVEIS PINBALL ====================
+local posicaoSalva = nil
+local andando = false
+local VELOCIDADE = 1300
+local VEL_LATERAL = 250
+local DETECCAO_PAREDE = 8
+local TEMPO_ENTRE_TROCA = 0.3
+
+-- ==================== GRAVACAO (Bugar Boss) ====================
+local gravacao = {
+  {tempo=0.301, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.317, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.320, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.332, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.335, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.345, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.349, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.358, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.361, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.369, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.372, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.384, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.388, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.407, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.419, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.451, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.457, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.477, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.489, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.499, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.502, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.511, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.514, x=512.73,  y=70.58, z=-362.57},
+  {tempo=0.563, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.639, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.714, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.730, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.743, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.767, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.803, x=946.14,  y=70.58, z=-332.05},
+  {tempo=0.818, x=946.14,  y=70.58, z=-332.05},
+}
+
+-- ==================== VARIAVEIS BUGAR BOSS ====================
+local executando = false
+
+local function executarUmaVez()
+    if executando then return end
+    executando = true
+    
+    task.spawn(function()
+        local inicio = tick()
+        
+        for i, ev in ipairs(gravacao) do
+            local char = player.Character
+            if not char then break end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then break end
+            
+            local decorrido = tick() - inicio
+            local espera = ev.tempo - decorrido
+            if espera > 0 then
+                task.wait(espera)
+            end
+            
+            hrp.CFrame = CFrame.new(ev.x, ev.y, ev.z)
+        end
+        
+        executando = false
+    end)
+end
+
+-- ==================== TEMA ====================
+local TEMA = {
+    fundo      = Color3.fromRGB(15, 15, 20),
+    painel     = Color3.fromRGB(25, 25, 35),
+    destaque   = Color3.fromRGB(46, 204, 113),
+    vermelho   = Color3.fromRGB(220, 40, 60),
+    texto      = Color3.fromRGB(240, 240, 245),
+    textoFraco = Color3.fromRGB(150, 150, 160),
+    verde      = Color3.fromRGB(50, 220, 100),
+    borda      = Color3.fromRGB(45, 45, 60),
+}
+
+-- ==================== GUI PRINCIPAL ====================
+local SG = Instance.new("ScreenGui")
+SG.Name = "KillerHubV3"
+SG.ResetOnSpawn = false
+SG.IgnoreGuiInset = true
+SG.DisplayOrder = 999999999
+SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SG.Parent = player:WaitForChild("PlayerGui")
+
+-- Frame principal
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 300, 0, 220)
+Main.Position = UDim2.new(0.5, -150, 0.5, -110)
+Main.BackgroundColor3 = TEMA.fundo
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Main.Visible = false
+Main.ZIndex = 10
+Main.Parent = SG
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = Main
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = TEMA.borda
+MainStroke.Thickness = 1.5
+MainStroke.Parent = Main
+
+-- HEADER
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 55)
+Header.BackgroundColor3 = TEMA.painel
+Header.BorderSizePixel = 0
+Header.Parent = Main
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.Parent = Header
+
+local HeaderFix = Instance.new("Frame")
+HeaderFix.Size = UDim2.new(1, 0, 0, 12)
+HeaderFix.Position = UDim2.new(0, 0, 1, -12)
+HeaderFix.BackgroundColor3 = TEMA.painel
+HeaderFix.BorderSizePixel = 0
+HeaderFix.Parent = Header
+
+local LinhaDecor = Instance.new("Frame")
+LinhaDecor.Size = UDim2.new(0, 4, 0, 35)
+LinhaDecor.Position = UDim2.new(0, 12, 0.5, -17)
+LinhaDecor.BackgroundColor3 = TEMA.destaque
+LinhaDecor.BorderSizePixel = 0
+LinhaDecor.Parent = Header
+
+local LinhaDecorCorner = Instance.new("UICorner")
+LinhaDecorCorner.CornerRadius = UDim.new(0, 2)
+LinhaDecorCorner.Parent = LinhaDecor
+
+local Logo = Instance.new("TextLabel")
+Logo.Size = UDim2.new(0, 200, 0, 22)
+Logo.Position = UDim2.new(0, 24, 0, 10)
+Logo.BackgroundTransparency = 1
+Logo.Text = "KILLER HUB"
+Logo.TextColor3 = TEMA.texto
+Logo.Font = Enum.Font.GothamBlack
+Logo.TextSize = 18
+Logo.TextXAlignment = Enum.TextXAlignment.Left
+Logo.Parent = Header
+
+local Versao = Instance.new("TextLabel")
+Versao.Size = UDim2.new(0, 200, 0, 15)
+Versao.Position = UDim2.new(0, 25, 0, 32)
+Versao.BackgroundTransparency = 1
+Versao.Text = "By KILLER | v3.0"
+Versao.TextColor3 = TEMA.textoFraco
+Versao.Font = Enum.Font.Gotham
+Versao.TextSize = 10
+Versao.TextXAlignment = Enum.TextXAlignment.Left
+Versao.Parent = Header
+
+local BtnMin = Instance.new("TextButton")
+BtnMin.Size = UDim2.new(0, 30, 0, 30)
+BtnMin.Position = UDim2.new(1, -42, 0, 12)
+BtnMin.BackgroundColor3 = TEMA.fundo
+BtnMin.Text = "—"
+BtnMin.TextColor3 = TEMA.texto
+BtnMin.Font = Enum.Font.GothamBold
+BtnMin.TextSize = 18
+BtnMin.AutoButtonColor = false
+BtnMin.Parent = Header
+
+local BtnMinCorner = Instance.new("UICorner")
+BtnMinCorner.CornerRadius = UDim.new(0, 6)
+BtnMinCorner.Parent = BtnMin
+
+-- ==================== ABAS (TABS) ====================
+local TabFrame = Instance.new("Frame")
+TabFrame.Size = UDim2.new(1, -20, 0, 30)
+TabFrame.Position = UDim2.new(0, 10, 0, 62)
+TabFrame.BackgroundTransparency = 1
+TabFrame.Parent = Main
+
+local BtnTab1 = Instance.new("TextButton")
+BtnTab1.Size = UDim2.new(0.5, -5, 1, 0)
+BtnTab1.Position = UDim2.new(0, 0, 0, 0)
+BtnTab1.BackgroundColor3 = TEMA.destaque
+BtnTab1.Text = "AUTO BASE"
+BtnTab1.TextColor3 = TEMA.texto
+BtnTab1.Font = Enum.Font.GothamBold
+BtnTab1.TextSize = 12
+BtnTab1.AutoButtonColor = false
+BtnTab1.Parent = TabFrame
+
+local BtnTab1Corner = Instance.new("UICorner")
+BtnTab1Corner.CornerRadius = UDim.new(0, 6)
+BtnTab1Corner.Parent = BtnTab1
+
+local BtnTab2 = Instance.new("TextButton")
+BtnTab2.Size = UDim2.new(0.5, -5, 1, 0)
+BtnTab2.Position = UDim2.new(0.5, 5, 0, 0)
+BtnTab2.BackgroundColor3 = TEMA.fundo
+BtnTab2.Text = "BUGAR BOSS"
+BtnTab2.TextColor3 = TEMA.textoFraco
+BtnTab2.Font = Enum.Font.GothamBold
+BtnTab2.TextSize = 12
+BtnTab2.AutoButtonColor = false
+BtnTab2.Parent = TabFrame
+
+local BtnTab2Corner = Instance.new("UICorner")
+BtnTab2Corner.CornerRadius = UDim.new(0, 6)
+BtnTab2Corner.Parent = BtnTab2
+
+-- ==================== ABA 1: AUTO BASE (PINBALL) ====================
+local Aba1 = Instance.new("Frame")
+Aba1.Size = UDim2.new(1, -20, 1, -105)
+Aba1.Position = UDim2.new(0, 10, 0, 98)
+Aba1.BackgroundTransparency = 1
+Aba1.Visible = true
+Aba1.Parent = Main
+
+local BtnSalvar = Instance.new("TextButton")
+BtnSalvar.Size = UDim2.new(0, 130, 0, 35)
+BtnSalvar.Position = UDim2.new(0, 0, 0, 0)
+BtnSalvar.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+BtnSalvar.Text = "SALVAR"
+BtnSalvar.TextColor3 = TEMA.texto
+BtnSalvar.Font = Enum.Font.GothamBold
+BtnSalvar.TextSize = 12
+BtnSalvar.AutoButtonColor = false
+BtnSalvar.Parent = Aba1
+
+local BtnSalvarCorner = Instance.new("UICorner")
+BtnSalvarCorner.CornerRadius = UDim.new(0, 8)
+BtnSalvarCorner.Parent = BtnSalvar
+
+local BtnGo = Instance.new("TextButton")
+BtnGo.Size = UDim2.new(0, 130, 0, 35)
+BtnGo.Position = UDim2.new(1, -130, 0, 0)
+BtnGo.BackgroundColor3 = TEMA.destaque
+BtnGo.Text = "GO"
+BtnGo.TextColor3 = TEMA.texto
+BtnGo.Font = Enum.Font.GothamBold
+BtnGo.TextSize = 14
+BtnGo.AutoButtonColor = false
+BtnGo.Parent = Aba1
+
+local BtnGoCorner = Instance.new("UICorner")
+BtnGoCorner.CornerRadius = UDim.new(0, 8)
+BtnGoCorner.Parent = BtnGo
+
+local Status1 = Instance.new("TextLabel")
+Status1.Size = UDim2.new(1, 0, 0, 50)
+Status1.Position = UDim2.new(0, 0, 0, 45)
+Status1.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+Status1.BorderSizePixel = 0
+Status1.Text = "Nenhuma posição salva"
+Status1.TextColor3 = TEMA.textoFraco
+Status1.Font = Enum.Font.Gotham
+Status1.TextSize = 11
+Status1.TextWrapped = true
+Status1.Parent = Aba1
+
+local Status1Corner = Instance.new("UICorner")
+Status1Corner.CornerRadius = UDim.new(0, 8)
+Status1Corner.Parent = Status1
+
+-- ==================== ABA 2: BUGAR BOSS ====================
+local Aba2 = Instance.new("Frame")
+Aba2.Size = UDim2.new(1, -20, 1, -105)
+Aba2.Position = UDim2.new(0, 10, 0, 98)
+Aba2.BackgroundTransparency = 1
+Aba2.Visible = false
+Aba2.Parent = Main
+
+local BtnExecutar = Instance.new("TextButton")
+BtnExecutar.Size = UDim2.new(1, 0, 0, 55)
+BtnExecutar.Position = UDim2.new(0, 0, 0, 0)
+BtnExecutar.BackgroundColor3 = TEMA.destaque
+BtnExecutar.Text = "BUGAR BOSS"
+BtnExecutar.TextColor3 = TEMA.texto
+BtnExecutar.Font = Enum.Font.GothamBlack
+BtnExecutar.TextSize = 18
+BtnExecutar.AutoButtonColor = false
+BtnExecutar.Parent = Aba2
+
+local BtnExecutarCorner = Instance.new("UICorner")
+BtnExecutarCorner.CornerRadius = UDim.new(0, 10)
+BtnExecutarCorner.Parent = BtnExecutar
+
+BtnExecutar.MouseEnter:Connect(function()
+    TweenService:Create(BtnExecutar, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(35, 160, 90)
+    }):Play()
+end)
+BtnExecutar.MouseLeave:Connect(function()
+    TweenService:Create(BtnExecutar, TweenInfo.new(0.2), {
+        BackgroundColor3 = TEMA.destaque
+    }):Play()
+end)
+
+local Status2 = Instance.new("TextLabel")
+Status2.Size = UDim2.new(1, 0, 0, 25)
+Status2.Position = UDim2.new(0, 0, 0, 65)
+Status2.BackgroundTransparency = 1
+Status2.Text = "Pronto"
+Status2.TextColor3 = TEMA.textoFraco
+Status2.Font = Enum.Font.Gotham
+Status2.TextSize = 11
+Status2.Parent = Aba2
+
+-- ==================== TROCA DE ABAS ====================
+local abaAtual = 1
+
+local function trocarAba(nova)
+    if abaAtual == nova then return end
+    abaAtual = nova
+    
+    if nova == 1 then
+        Aba1.Visible = true
+        Aba2.Visible = false
+        BtnTab1.BackgroundColor3 = TEMA.destaque
+        BtnTab1.TextColor3 = TEMA.texto
+        BtnTab2.BackgroundColor3 = TEMA.fundo
+        BtnTab2.TextColor3 = TEMA.textoFraco
+    else
+        Aba1.Visible = false
+        Aba2.Visible = true
+        BtnTab1.BackgroundColor3 = TEMA.fundo
+        BtnTab1.TextColor3 = TEMA.textoFraco
+        BtnTab2.BackgroundColor3 = TEMA.destaque
+        BtnTab2.TextColor3 = TEMA.texto
+    end
+end
+
+BtnTab1.MouseButton1Click:Connect(function() trocarAba(1) end)
+BtnTab2.MouseButton1Click:Connect(function() trocarAba(2) end)
+
+-- ==================== BOTÃO FLUTUANTE ====================
+local BtnFloat = Instance.new("TextButton")
+BtnFloat.Size = UDim2.new(0, 60, 0, 60)
+BtnFloat.Position = UDim2.new(0, 20, 0.5, -30)
+BtnFloat.BackgroundColor3 = TEMA.destaque
+BtnFloat.Text = "K"
+BtnFloat.TextColor3 = TEMA.texto
+BtnFloat.Font = Enum.Font.GothamBlack
+BtnFloat.TextSize = 24
+BtnFloat.AutoButtonColor = false
+BtnFloat.ZIndex = 10
+BtnFloat.Parent = SG
+
+local BtnFloatCorner = Instance.new("UICorner")
+BtnFloatCorner.CornerRadius = UDim.new(0, 30)
+BtnFloatCorner.Parent = BtnFloat
+
+local BtnFloatStroke = Instance.new("UIStroke")
+BtnFloatStroke.Color = Color3.fromRGB(255, 255, 255)
+BtnFloatStroke.Thickness = 2
+BtnFloatStroke.Transparency = 0.5
+BtnFloatStroke.Parent = BtnFloat
+
+task.spawn(function()
+    while BtnFloat.Parent do
+        TweenService:Create(BtnFloatStroke, TweenInfo.new(1), {Transparency = 0.9}):Play()
+        task.wait(1)
+        TweenService:Create(BtnFloatStroke, TweenInfo.new(1), {Transparency = 0.5}):Play()
+        task.wait(1)
+    end
+end)
+
+local dragando = false
+local movendo = false
+local dragStart = nil
+local startPos = nil
+
+BtnFloat.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragando = true
+        movendo = false
+        dragStart = input.Position
+        startPos = BtnFloat.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragando = false
+            end
+        end)
+    end
+end)
+
+BtnFloat.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if dragando then
+            local delta = input.Position - dragStart
+            if delta.Magnitude > 5 then movendo = true end
+            if movendo then
+                BtnFloat.Position = UDim2.new(
+                    startPos.X.Scale, startPos.X.Offset + delta.X,
+                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
+                )
+            end
+        end
+    end
+end)
+
+-- ==================== ABRIR/FECHAR ====================
+local aberto = false
+
+local function abrir()
+    if aberto then return end
+    aberto = true
+    BtnFloat.Visible = false
+    Main.Visible = true
+    Main.Size = UDim2.new(0, 0, 0, 0)
+    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+        Size = UDim2.new(0, 300, 0, 220),
+        Position = UDim2.new(0.5, -150, 0.5, -110)
+    }):Play()
+end
+
+local function fechar()
+    if not aberto then return end
+    aberto = false
+    local tween = TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    })
+    tween:Play()
+    tween.Completed:Connect(function()
+        Main.Visible = false
+        BtnFloat.Visible = true
+    end)
+end
+
+BtnFloat.MouseButton1Click:Connect(function()
+    if not movendo then abrir() end
+end)
+
+BtnMin.MouseButton1Click:Connect(fechar)
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.K then
+        if aberto then fechar() else abrir() end
+    end
+end)
+
+-- ==================== LOGICA PINBALL ====================
+BtnSalvar.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    posicaoSalva = Vector3.new(hrp.Position.X, hrp.Position.Y, hrp.Position.Z)
+    Status1.Text = "Salvo!\nX:" .. math.floor(posicaoSalva.X) .. " Z:" .. math.floor(posicaoSalva.Z)
+    Status1.TextColor3 = TEMA.verde
+    
+    task.wait(2)
+    Status1.Text = "Posição salva e pronta"
+    Status1.TextColor3 = TEMA.textoFraco
+end)
+
+local function temParedeNaFrente(origem, direcao, distancia)
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = {player.Character}
+    rayParams.IgnoreWater = true
+    
+    local resultado = workspace:Raycast(origem, direcao * distancia, rayParams)
+    return resultado ~= nil
+end
+
+local function andarPinball()
+    if andando then return end
+    if not posicaoSalva then
+        Status1.Text = "Salve uma posição primeiro!"
+        Status1.TextColor3 = Color3.fromRGB(255, 80, 80)
+        return
+    end
+    
+    andando = true
+    BtnGo.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+    BtnGo.Text = "PARAR"
+    Status1.Text = "Auto Base ativado!"
+    Status1.TextColor3 = TEMA.verde
+    
+    task.spawn(function()
+        local ladoAtual = 1
+        local tempoUltimaTroca = 0
+        
+        while andando do
+            local char = player.Character
+            if not char then break end
+            
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then break end
+            
+            local posAtual = hrp.Position
+            local direcao = posicaoSalva - posAtual
+            local distancia = direcao.Magnitude
+            
+            if distancia < 5 then
+                hrp.CFrame = CFrame.new(posicaoSalva)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                break
+            end
+            
+            local dirXZ = Vector3.new(direcao.X, 0, direcao.Z)
+            if dirXZ.Magnitude < 0.01 then break end
+            local dirUnit = dirXZ.Unit
+            
+            local lateral = Vector3.new(-dirUnit.Z, 0, dirUnit.X)
+            
+            local direcaoLateral = lateral * ladoAtual
+            local temParede = temParedeNaFrente(posAtual, direcaoLateral, DETECCAO_PAREDE)
+            
+            local agora = tick()
+            if temParede and (agora - tempoUltimaTroca) > TEMPO_ENTRE_TROCA then
+                ladoAtual = -ladoAtual
+                tempoUltimaTroca = agora
+            end
+            
+            local velocity = Vector3.new(
+                (dirUnit.X * VELOCIDADE) + (lateral.X * ladoAtual * VEL_LATERAL),
+                0,
+                (dirUnit.Z * VELOCIDADE) + (lateral.Z * ladoAtual * VEL_LATERAL)
+            )
+            
+            hrp.AssemblyLinearVelocity = velocity
+            
+            if math.random() < 0.1 then
+                local paredeStatus = temParede and " " or ""
+                local ladoTexto = ladoAtual == 1 and "→" or "←"
+                Status1.Text = " " .. math.floor(distancia) .. " Pasos " .. ladoTexto .. paredeStatus
+            end
+            
+            task.wait()
+        end
+        
+        andando = false
+        BtnGo.BackgroundColor3 = TEMA.destaque
+        BtnGo.Text = "GO"
+        Status1.Text = "Chegou no destino!"
+        Status1.TextColor3 = TEMA.verde
+        
+        task.wait(2)
+        Status1.Text = "Posição salva e pronta"
+        Status1.TextColor3 = TEMA.textoFraco
+    end)
+end
+
+BtnGo.MouseButton1Click:Connect(function()
+    if andando then
+        andando = false
+        BtnGo.BackgroundColor3 = TEMA.destaque
+        BtnGo.Text = "GO"
+        Status1.Text = "Parado"
+        Status1.TextColor3 = TEMA.textoFraco
+    else
+        andarPinball()
+    end
+end)
+
+-- ==================== LOGICA BUGAR BOSS ====================
+BtnExecutar.MouseButton1Click:Connect(function()
+    if executando then
+        Status2.Text = "Bugando..."
+        Status2.TextColor3 = TEMA.destaque
+        return
+    end
+    
+    Status2.Text = "Bugando..."
+    Status2.TextColor3 = TEMA.verde
+    
+    executarUmaVez()
+    
+    task.wait(1)
+    Status2.Text = "Pronto"
+    Status2.TextColor3 = TEMA.textoFraco
+end)
+
+-- Abre automático
+task.wait(1)
+abrir()
+
+print("✅ KILLER HUB V3.0 carregado")
