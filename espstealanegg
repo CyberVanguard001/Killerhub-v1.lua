@@ -1,7 +1,3 @@
--- =====================================================
--- KILLER HUB (MOBILE / DELTA) - APENAS ESP DE OVOS
--- ESP Verde + Filtro de Distância + Filtro de Raridade Exata
--- =====================================================
 
 if not game then return end
 
@@ -12,7 +8,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 
--- ==================== MÓDULOS DO JOGO (EGG & PET DATA) ====================
 local EggState, AreasData, RarityData, AssetsData, PetsData
 pcall(function() EggState = require(ReplicatedStorage.Client.EggState) end)
 pcall(function() AreasData = require(ReplicatedStorage.Data.Areas) end)
@@ -36,7 +31,6 @@ local RARITY_SCORE_MAP = {
     ["Basic"]           = 100,  ["Common"]          = 100,
 }
 
--- ==================== OCULTADOR INTELIGENTE DE HUBS ====================
 local preservar = {
     "killerhub", "killer", "delta", "executor", "fluxus", 
     "arceus", "codex", "roblox", "chat", "core", "prompt", "interact", 
@@ -91,14 +85,12 @@ task.spawn(function()
     end
 end)
 
--- ==================== EXECUÇÃO DO MIRANDA AFK ====================
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/Fn-stealanegg.lua"))()
     end)
 end)
 
--- ==================== TEMA ====================
 local TEMA = {
     fundo      = Color3.fromRGB(15, 15, 20),
     painel     = Color3.fromRGB(25, 25, 35),
@@ -110,12 +102,10 @@ local TEMA = {
     borda      = Color3.fromRGB(45, 45, 60),
 }
 
--- ==================== VARIÁVEIS DO ESP ====================
 local espOvosAtivo = false
 local maxEspDistance = 1000
 local targetRarityName = "Todos" -- Filtro exato por nome
 
--- ==================== GUI PRINCIPAL ====================
 local SG = Instance.new("ScreenGui")
 SG.Name = "KillerHubV1"
 SG.ResetOnSpawn = false
@@ -144,7 +134,6 @@ MainStroke.Color = TEMA.borda
 MainStroke.Thickness = 1.5
 MainStroke.Parent = Main
 
--- HEADER
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 50)
 Header.BackgroundColor3 = TEMA.painel
@@ -198,7 +187,6 @@ local BtnMinCorner = Instance.new("UICorner")
 BtnMinCorner.CornerRadius = UDim.new(0, 6)
 BtnMinCorner.Parent = BtnMin
 
--- CONTAINER PRINCIPAL
 local Content = Instance.new("Frame")
 Content.Size = UDim2.new(1, -20, 1, -65)
 Content.Position = UDim2.new(0, 10, 0, 60)
@@ -210,7 +198,6 @@ UIList.SortOrder = Enum.SortOrder.LayoutOrder
 UIList.Padding = UDim.new(0, 8)
 UIList.Parent = Content
 
--- SEÇÃO: SISTEMA DE ESP
 local SecESP = Instance.new("TextLabel")
 SecESP.Size = UDim2.new(1, 0, 0, 20)
 SecESP.BackgroundTransparency = 1
@@ -220,7 +207,6 @@ SecESP.Font = Enum.Font.GothamBold
 SecESP.TextSize = 11
 SecESP.Parent = Content
 
--- TOGGLE ESP
 local BtnToggleESP = Instance.new("TextButton")
 BtnToggleESP.Size = UDim2.new(1, 0, 0, 36)
 BtnToggleESP.BackgroundColor3 = TEMA.painel
@@ -240,7 +226,6 @@ BtnToggleESP.MouseButton1Click:Connect(function()
     BtnToggleESP.TextColor3 = espOvosAtivo and TEMA.verde or TEMA.vermelho
 end)
 
--- FILTRO DE RARIDADE EXATA (SELECIONA APENAS A RARIDADE ESCOLHIDA)
 local niveisFiltro = {
     "Todos",
     "Common",
@@ -276,7 +261,6 @@ BtnFiltro.MouseButton1Click:Connect(function()
     BtnFiltro.Text = "Filtro Raridade: " .. targetRarityName
 end)
 
--- TEXTBOX DISTÂNCIA
 local DistLabel = Instance.new("TextLabel")
 DistLabel.Size = UDim2.new(1, 0, 0, 20)
 DistLabel.BackgroundTransparency = 1
@@ -309,7 +293,6 @@ DistInput.FocusLost:Connect(function()
     end
 end)
 
--- ==================== BOTÃO FLUTUANTE (MOBILE) ====================
 local BtnFloat = Instance.new("TextButton")
 BtnFloat.Size = UDim2.new(0, 55, 0, 55)
 BtnFloat.Position = UDim2.new(0, 15, 0.5, -27)
@@ -379,7 +362,6 @@ BtnFloat.MouseButton1Click:Connect(function()
 end)
 BtnMin.MouseButton1Click:Connect(fechar)
 
--- ==================== FUNÇÕES AUXILIARES DE RARIDADE E FOTO ====================
 local function GetEggRarityInfo(egg)
     if not egg then return "Common", 100 end
 
@@ -437,7 +419,6 @@ local function GetPetIcon(record)
     return nil
 end
 
--- ==================== SISTEMA DE ESP MOTOR ====================
 local espFolder = Instance.new("Folder")
 espFolder.Name = "KILLER_HUB_ESP_STORAGE"
 espFolder.Parent = Workspace
@@ -459,7 +440,6 @@ local function limparTudoESP(tbl)
     end
 end
 
--- LOOP DO ESP
 task.spawn(function()
     while task.wait(0.2) do
         pcall(function()
@@ -546,7 +526,7 @@ task.spawn(function()
                         end
                     end
 
-                    -- Limpa ESPs de ovos que saíram da distância ou foram filtrados
+                    
                     for uid in pairs(activeEggESP) do
                         if not currentUids[uid] then
                             limparObjetoESP(activeEggESP, uid)
