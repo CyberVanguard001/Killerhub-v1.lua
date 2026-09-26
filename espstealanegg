@@ -457,7 +457,7 @@ task.spawn(function()
                             local eggPos = record.BoundsCFrame.Position
                             local dist = math.floor((eggPos - myPos).Magnitude)
                             
-                            -- Aplica o Filtro de Distância
+                            
                             if dist <= maxEspDistance then
                                 local rarityName, _ = GetEggRarityInfo(record)
                                 
