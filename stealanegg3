@@ -1,14 +1,9 @@
--- =====================================================
--- KILLER HUB (MOBILE / DELTA) - VERSÃO SIMPLIFICADA
--- Seleção de Locais + Movimento Zigzag (Pinball)
--- =====================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
--- ==================== OCULTADOR INTELIGENTE DE HUBS (PROTEGE O DELTA) ====================
 local preservar = {
     "killerhubv1", "killerhub", "killer", "delta", "executor", "fluxus", 
     "arceus", "codex", "roblox", "chat", "core", "prompt", "interact", 
@@ -70,14 +65,12 @@ task.spawn(function()
     end
 end)
 
--- ==================== EXECUÇÃO DO MIRANDA AFK ====================
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/Fn-stealanegg.lua"))()
     end)
 end)
 
--- ==================== VARIÁVEIS DE MOVIMENTO (ZIGZAG) ====================
 local posicaoSalva = nil
 local nomeLocalSelecionado = ""
 local andando = false
@@ -95,7 +88,6 @@ local listaLocais = {
     {nome = "Demons and Angels", pos = Vector3.new(5644, 70.58, -340)},
 }
 
--- ==================== TEMA ====================
 local TEMA = {
     fundo      = Color3.fromRGB(15, 15, 20),
     painel     = Color3.fromRGB(25, 25, 35),
@@ -107,7 +99,6 @@ local TEMA = {
     selecao    = Color3.fromRGB(46, 204, 113), -- Verde para seleção
 }
 
--- ==================== GUI PRINCIPAL ====================
 local SG = Instance.new("ScreenGui")
 SG.Name = "KillerHubV1"
 SG.ResetOnSpawn = false
@@ -136,7 +127,6 @@ MainStroke.Color = TEMA.borda
 MainStroke.Thickness = 1.5
 MainStroke.Parent = Main
 
--- HEADER
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 50)
 Header.BackgroundColor3 = TEMA.painel
@@ -190,14 +180,12 @@ local BtnMinCorner = Instance.new("UICorner")
 BtnMinCorner.CornerRadius = UDim.new(0, 6)
 BtnMinCorner.Parent = BtnMin
 
--- CONTAINER PRINCIPAL
 local Content = Instance.new("Frame")
 Content.Size = UDim2.new(1, -20, 1, -65)
 Content.Position = UDim2.new(0, 10, 0, 58)
 Content.BackgroundTransparency = 1
 Content.Parent = Main
 
--- BOTÃO GO
 local BtnGo = Instance.new("TextButton")
 BtnGo.Size = UDim2.new(1, 0, 0, 40)
 BtnGo.Position = UDim2.new(0, 0, 0, 0)
@@ -212,7 +200,6 @@ local BtnGoCorner = Instance.new("UICorner")
 BtnGoCorner.CornerRadius = UDim.new(0, 8)
 BtnGoCorner.Parent = BtnGo
 
--- STATUS
 local Status = Instance.new("TextLabel")
 Status.Size = UDim2.new(1, 0, 0, 25)
 Status.Position = UDim2.new(0, 0, 0, 45)
@@ -223,7 +210,6 @@ Status.Font = Enum.Font.Gotham
 Status.TextSize = 11
 Status.Parent = Content
 
--- LISTA DE LOCAIS (SCROLL)
 local ScrollLocais = Instance.new("ScrollingFrame")
 ScrollLocais.Size = UDim2.new(1, 0, 1, -75)
 ScrollLocais.Position = UDim2.new(0, 0, 0, 75)
@@ -260,7 +246,7 @@ for i, loc in ipairs(listaLocais) do
         posicaoSalva = loc.pos
         nomeLocalSelecionado = loc.nome
         
-        -- Destaque Verde para o botão selecionado
+        
         for name, button in pairs(botoesLocais) do
             button.BackgroundColor3 = (name == loc.nome) and TEMA.selecao or TEMA.painel
         end
@@ -272,7 +258,6 @@ end
 
 ScrollLocais.CanvasSize = UDim2.new(0, 0, 0, #listaLocais * 38)
 
--- ==================== BOTÃO FLUTUANTE (MOBILE) ====================
 local BtnFloat = Instance.new("TextButton")
 BtnFloat.Size = UDim2.new(0, 55, 0, 55)
 BtnFloat.Position = UDim2.new(0, 15, 0.5, -27)
@@ -347,7 +332,6 @@ end)
 
 BtnMin.MouseButton1Click:Connect(fechar)
 
--- ==================== MOVIMENTO ZIGZAG (PINBALL) ====================
 local function temParedeNaFrente(origem, direcao, distancia)
     local rayParams = RaycastParams.new()
     rayParams.FilterType = Enum.RaycastFilterType.Exclude
