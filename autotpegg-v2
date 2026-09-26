@@ -218,7 +218,7 @@ local Logo = Instance.new("TextLabel")
 Logo.Size = UDim2.new(0, 180, 0, 15)
 Logo.Position = UDim2.new(0, 20, 0, 5)
 Logo.BackgroundTransparency = 1
-Logo.Text = "STEAL PANEL"
+Logo.Text = "AUTO TP | By KILLER"
 Logo.TextColor3 = TEMA.texto
 Logo.Font = Enum.Font.GothamBlack
 Logo.TextSize = 13
@@ -404,7 +404,6 @@ local function tpParar()
     end
 end
 
--- ⚡ TP RETO (sem zigzag, sem detecção de parede)
 local function tpPara(pos, uid)
     if not pos then return end
     
@@ -434,7 +433,7 @@ local function tpPara(pos, uid)
             local dxz = Vector3.new(diff.X, 0, diff.Z)
             if dxz.Magnitude < 0.01 then break end
             local u = dxz.Unit
-            -- ⚡ Vai DIRETO na direção (sem desvio lateral)
+            
             hrp.AssemblyLinearVelocity = Vector3.new(
                 u.X * tweenSpeed, 0, u.Z * tweenSpeed)
             task.wait()
@@ -634,4 +633,4 @@ end)
 
 task.wait(0.5)
 abrir()
-print("✅ Steal Panel v5 carregado (TP RETO)!")
+print("✅ By KILLER | Auto TP carregado!")
