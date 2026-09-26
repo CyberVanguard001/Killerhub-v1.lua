@@ -1,7 +1,3 @@
--- =====================================================
--- STEAL PANEL v5 — Compacto + Botão TP que vira ❌
--- Usa BoundsCFrame (igual seu ESP) + calcula valor do Chilli
--- =====================================================
 
 local Players           = game:GetService("Players")
 local RunService        = game:GetService("RunService")
@@ -11,18 +7,12 @@ local CoreGui           = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
 
--- ═══════════════════════════════════════════════════════════════
--- MÓDULOS DO JOGO
--- ═══════════════════════════════════════════════════════════════
 local EggState, AssetsData, MutationsData, EggRecords
 pcall(function() EggState    = require(ReplicatedStorage.Client.EggState) end)
 pcall(function() AssetsData  = require(ReplicatedStorage.Data.Assets) end)
 pcall(function() MutationsData = require(ReplicatedStorage.Shared.Modules.Mutations) end)
 pcall(function() EggRecords  = require(ReplicatedStorage.Shared.Util.EggRecords) end)
 
--- ═══════════════════════════════════════════════════════════════
--- HELPERS
--- ═══════════════════════════════════════════════════════════════
 local RARITY_SCORE_MAP = {
     ["Light & Dark"]=1300,["Titan"]=1100,["Divine"]=1000,["Transcendent"]=1000,
     ["Superior"]=1000,["Eternal"]=900,["Limited"]=900,["Secret"]=800,
@@ -136,9 +126,6 @@ local function fmtWeight(w)
     return out .. dec .. " Kg"
 end
 
--- ═══════════════════════════════════════════════════════════════
--- LEITURA DE OVOS
--- ═══════════════════════════════════════════════════════════════
 local function lerOvos()
     local lista = {}
     if not EggState or type(EggState.ReadFieldEggs) ~= "function" then
@@ -181,9 +168,6 @@ local function lerOvos()
     return lista
 end
 
--- ═══════════════════════════════════════════════════════════════
--- TEMA
--- ═══════════════════════════════════════════════════════════════
 local TEMA = {
     fundo      = Color3.fromRGB(15, 15, 20),
     painel     = Color3.fromRGB(25, 25, 35),
@@ -195,9 +179,6 @@ local TEMA = {
     borda      = Color3.fromRGB(45, 45, 60),
 }
 
--- ═══════════════════════════════════════════════════════════════
--- UI COMPACTA
--- ═══════════════════════════════════════════════════════════════
 local SG = Instance.new("ScreenGui")
 SG.Name = "EggTPPanel"
 SG.ResetOnSpawn = false
@@ -219,7 +200,6 @@ Main.Parent = SG
 local MC = Instance.new("UICorner"); MC.CornerRadius = UDim.new(0, 10); MC.Parent = Main
 local MS = Instance.new("UIStroke"); MS.Color = TEMA.borda; MS.Thickness = 1.5; MS.Parent = Main
 
--- Header
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 38)
 Header.BackgroundColor3 = TEMA.painel
@@ -270,7 +250,6 @@ BtnMin.Parent = Header
 
 local BMC = Instance.new("UICorner"); BMC.CornerRadius = UDim.new(0, 5); BMC.Parent = BtnMin
 
--- Speed bar
 local SpeedBar = Instance.new("Frame")
 SpeedBar.Size = UDim2.new(1, -16, 0, 22)
 SpeedBar.Position = UDim2.new(0, 8, 0, 44)
@@ -290,7 +269,6 @@ BtnSpeed.Parent = SpeedBar
 
 local BSC = Instance.new("UICorner"); BSC.CornerRadius = UDim.new(0, 5); BSC.Parent = BtnSpeed
 
--- Sort bar
 local SortBar = Instance.new("Frame")
 SortBar.Size = UDim2.new(1, -16, 0, 20)
 SortBar.Position = UDim2.new(0, 8, 0, 70)
@@ -309,7 +287,6 @@ BtnSort.Parent = SortBar
 
 local BSoC = Instance.new("UICorner"); BSoC.CornerRadius = UDim.new(0, 5); BSoC.Parent = BtnSort
 
--- Lista
 local List = Instance.new("ScrollingFrame")
 List.Size = UDim2.new(1, -16, 1, -124)
 List.Position = UDim2.new(0, 8, 0, 94)
@@ -335,7 +312,6 @@ Footer.Font = Enum.Font.Gotham
 Footer.TextSize = 8
 Footer.Parent = Main
 
--- Botão flutuante
 local BtnFloat = Instance.new("TextButton")
 BtnFloat.Size = UDim2.new(0, 46, 0, 46)
 BtnFloat.Position = UDim2.new(0, 12, 0.5, -23)
@@ -350,7 +326,6 @@ BtnFloat.Parent = SG
 local BFC = Instance.new("UICorner"); BFC.CornerRadius = UDim.new(0, 25); BFC.Parent = BtnFloat
 local BFS = Instance.new("UIStroke"); BFS.Color = Color3.fromRGB(255,255,255); BFS.Thickness = 2; BFS.Transparency = 0.5; BFS.Parent = BtnFloat
 
--- Drag botão flutuante
 local drag, mov, dStart, dPos = false, false, nil, nil
 BtnFloat.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
@@ -380,7 +355,6 @@ local function fechar() aberto = false; Main.Visible = false; BtnFloat.Visible =
 BtnFloat.MouseButton1Click:Connect(function() if not mov then abrir() end end)
 BtnMin.MouseButton1Click:Connect(fechar)
 
--- Drag da janela
 local wD, wS, wP = false, nil, nil
 Header.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
@@ -399,9 +373,6 @@ UserInputService.InputEnded:Connect(function(i)
     end
 end)
 
--- ═══════════════════════════════════════════════════════════════
--- BOTÕES
--- ═══════════════════════════════════════════════════════════════
 local sortModes = { "Value", "Rarity", "Distance" }
 local sortIdx = 1
 local tweenSpeed = 400
@@ -420,9 +391,6 @@ BtnSpeed.MouseButton1Click:Connect(function()
     BtnSpeed.Text = "Tween Speed: " .. tweenSpeed
 end)
 
--- ═══════════════════════════════════════════════════════════════
--- TP ZIGZAG (com controle de cancelamento por ovo)
--- ═══════════════════════════════════════════════════════════════
 local tpAtivo, tpAlvo = false, nil
 local tpUidAtual = nil  -- qual ovo está sendo teleportado agora
 
@@ -447,7 +415,7 @@ end
 
 local function tpPara(pos, uid)
     if not pos then return end
-    -- Se já tem outro TP rolando, cancela o anterior
+    
     if tpAtivo then
         tpParar()
         task.wait(0.1)
@@ -491,9 +459,6 @@ local function tpPara(pos, uid)
     end)
 end
 
--- ═══════════════════════════════════════════════════════════════
--- LINHA COMPACTA (com botão TP ↔ ❌)
--- ═══════════════════════════════════════════════════════════════
 local function criarLinha(d)
     local row = Instance.new("TextButton")
     row.Size = UDim2.new(1, -4, 0, 48)
@@ -549,7 +514,6 @@ local function criarLinha(d)
     det.TextXAlignment = Enum.TextXAlignment.Left
     det.Parent = row
 
-    -- Botão TP/❌
     local bSteal = Instance.new("TextButton")
     bSteal.AnchorPoint = Vector2.new(1, 0)
     bSteal.Position = UDim2.new(1, -5, 0, 4)
@@ -563,7 +527,6 @@ local function criarLinha(d)
     bSteal.Parent = row
     local c3 = Instance.new("UICorner"); c3.CornerRadius = UDim.new(0, 4); c3.Parent = bSteal
 
-    -- Estado local desse botão
     local tpDesteOvo = false
 
     local function voltarTP()
@@ -578,7 +541,6 @@ local function criarLinha(d)
         bSteal.BackgroundColor3 = TEMA.vermelho
         tpPara(d.Position, d.Uid)
 
-        -- Monitora o TP: quando acabar (chegou ou foi parado), volta o botão
         task.spawn(function()
             while tpDesteOvo do
                 task.wait(0.15)
@@ -602,7 +564,6 @@ local function criarLinha(d)
     dist.TextXAlignment = Enum.TextXAlignment.Right
     dist.Parent = row
 
-    -- Clique no botão TP/❌
     bSteal.MouseButton1Click:Connect(function()
         if tpDesteOvo then
             -- Cancelar
@@ -614,7 +575,6 @@ local function criarLinha(d)
         end
     end)
 
-    -- Clique na linha inteira (também começa TP, exceto se clicar no botão)
     row.MouseButton1Click:Connect(function()
         if not tpDesteOvo then
             comecarTP()
@@ -624,9 +584,6 @@ local function criarLinha(d)
     return row, dist
 end
 
--- ═══════════════════════════════════════════════════════════════
--- REFRESH
--- ═══════════════════════════════════════════════════════════════
 local linhasAtuais = {}
 local lastStatus = ""
 
@@ -681,9 +638,6 @@ task.spawn(function()
     end
 end)
 
--- ═══════════════════════════════════════════════════════════════
--- DIAGNÓSTICO
--- ═══════════════════════════════════════════════════════════════
 task.spawn(function()
     task.wait(2)
     print("[StealPanel] === DIAGNÓSTICO ===")
