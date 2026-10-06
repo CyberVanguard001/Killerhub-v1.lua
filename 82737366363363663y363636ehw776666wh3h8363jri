@@ -1,0 +1,450 @@
+
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local PG = player:WaitForChild("PlayerGui")
+
+task.spawn(function()
+    while true do
+        local ui = PG:FindFirstChild("EggStealerUI")
+        if ui and ui.Enabled then
+            ui.Enabled = false
+        end
+        local area = workspace:FindFirstChild("MirandaScriptArea")
+        if area and area.Transparency ~= 1 then
+            area.Transparency = 1
+            area.CanCollide = false
+            for _, d in ipairs(area:GetDescendants()) do
+                if d:IsA("BasePart") then d.Transparency = 1
+                elseif d:IsA("Decal") or d:IsA("Texture") then d.Transparency = 1
+                elseif d:IsA("BillboardGui") or d:IsA("SurfaceGui") then d.Enabled = false
+                elseif d:IsA("GuiObject") then d.Visible = false
+                end
+            end
+        end
+        task.wait(0.3)
+    end
+end)
+
+task.spawn(function()
+    task.wait(3)
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("Highlight") then
+            local p = d.Parent
+            local pName = p and p.Name:lower() or ""
+            local dName = d.Name:lower()
+            if pName:find("mirand") or dName:find("mirand") or dName:find("target")
+               or dName:find("steal") or dName:find("mhub") then
+                d.Enabled = false
+            end
+        elseif d:IsA("SelectionBox") then
+            local dName = d.Name:lower()
+            if dName:find("mirand") or dName:find("target") or dName:find("steal") then
+                d.Visible = false
+            end
+        end
+    end
+end)
+
+
+task.spawn(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/miirandahub/loader/refs/heads/main/stealeggies"))()
+    end)
+end)
+
+local timeout = tick() + 30
+while tick() < timeout do
+    if PG:FindFirstChild("EggStealerUI") then break end
+    task.wait(0.1)
+end
+task.wait(2)
+
+if CoreGui:FindFirstChild("FoxAtalhoGui") then CoreGui.FoxAtalhoGui:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FoxAtalhoGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 9999
+ScreenGui.Parent = CoreGui
+
+local Container = Instance.new("Frame")
+Container.Size = UDim2.new(0, 280, 0, 60)
+Container.Position = UDim2.new(0, 30, 0.5, -30)
+Container.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
+Container.BackgroundTransparency = 0.15
+Container.BorderSizePixel = 0
+Container.Active = true
+Container.Draggable = true
+Container.Parent = ScreenGui
+Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 14)
+
+local ContainerStroke = Instance.new("UIStroke")
+ContainerStroke.Color = Color3.fromRGB(0, 220, 130)
+ContainerStroke.Thickness = 1.5
+ContainerStroke.Transparency = 0.3
+ContainerStroke.Parent = Container
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, -170, 0, 22)
+TitleLabel.Position = UDim2.new(0, 58, 0, 10)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "Auto Steal"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 15
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = Container
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(1, -170, 0, 16)
+StatusLabel.Position = UDim2.new(0, 58, 0, 32)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "Desativado"
+StatusLabel.TextColor3 = Color3.fromRGB(160, 160, 175)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 11
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+StatusLabel.TextTruncate = Enum.TextTruncate.AtEnd
+StatusLabel.Parent = Container
+
+local ListBtn = Instance.new("TextButton")
+ListBtn.Size = UDim2.new(0, 30, 0, 30)
+ListBtn.Position = UDim2.new(1, -96, 0.5, -15)
+ListBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+ListBtn.Text = "L"
+ListBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ListBtn.Font = Enum.Font.GothamBold
+ListBtn.TextSize = 13
+ListBtn.AutoButtonColor = false
+ListBtn.Parent = Container
+Instance.new("UICorner", ListBtn).CornerRadius = UDim.new(0, 8)
+
+local SwitchBg = Instance.new("TextButton")
+SwitchBg.Size = UDim2.new(0, 48, 0, 26)
+SwitchBg.Position = UDim2.new(1, -60, 0.5, -13)
+SwitchBg.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+SwitchBg.Text = ""
+SwitchBg.AutoButtonColor = false
+SwitchBg.Parent = Container
+Instance.new("UICorner", SwitchBg).CornerRadius = UDim.new(1, 0)
+
+local SwitchKnob = Instance.new("Frame")
+SwitchKnob.Size = UDim2.new(0, 20, 0, 20)
+SwitchKnob.Position = UDim2.new(0, 3, 0.5, -10)
+SwitchKnob.BackgroundColor3 = Color3.fromRGB(230, 230, 240)
+SwitchKnob.BorderSizePixel = 0
+SwitchKnob.Parent = SwitchBg
+Instance.new("UICorner", SwitchKnob).CornerRadius = UDim.new(1, 0)
+
+local ListFrame = Instance.new("Frame")
+ListFrame.Size = UDim2.new(0, 340, 0, 150)
+ListFrame.Position = UDim2.new(0.5, -170, 0.5, -75)
+ListFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
+ListFrame.BorderSizePixel = 0
+ListFrame.Active = true
+ListFrame.Draggable = true
+ListFrame.Visible = false
+ListFrame.Parent = ScreenGui
+Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 14)
+local ListFrameStroke = Instance.new("UIStroke")
+ListFrameStroke.Color = Color3.fromRGB(0, 220, 130)
+ListFrameStroke.Thickness = 1.5
+ListFrameStroke.Transparency = 0.4
+ListFrameStroke.Parent = ListFrame
+
+local ListHeader = Instance.new("Frame")
+ListHeader.Size = UDim2.new(1, 0, 0, 36)
+ListHeader.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+ListHeader.BorderSizePixel = 0
+ListHeader.ZIndex = 2
+ListHeader.Parent = ListFrame
+Instance.new("UICorner", ListHeader).CornerRadius = UDim.new(0, 14)
+
+local ListTitle = Instance.new("TextLabel")
+ListTitle.Size = UDim2.new(1, -50, 1, 0)
+ListTitle.Position = UDim2.new(0, 14, 0, 0)
+ListTitle.BackgroundTransparency = 1
+ListTitle.Text = "Escolher pet"
+ListTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ListTitle.Font = Enum.Font.GothamBold
+ListTitle.TextSize = 13
+ListTitle.TextXAlignment = Enum.TextXAlignment.Left
+ListTitle.Parent = ListHeader
+
+local ListClose = Instance.new("TextButton")
+ListClose.Size = UDim2.new(0, 24, 0, 24)
+ListClose.Position = UDim2.new(1, -32, 0, 6)
+ListClose.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+ListClose.Text = "X"
+ListClose.TextColor3 = Color3.fromRGB(255, 255, 255)
+ListClose.Font = Enum.Font.GothamBold
+ListClose.TextSize = 12
+ListClose.AutoButtonColor = false
+ListClose.ZIndex = 3
+ListClose.Parent = ListHeader
+Instance.new("UICorner", ListClose).CornerRadius = UDim.new(0, 6)
+
+local ListScroll = Instance.new("ScrollingFrame")
+ListScroll.Size = UDim2.new(1, -16, 1, -46)
+ListScroll.Position = UDim2.new(0, 8, 0, 42)
+ListScroll.BackgroundTransparency = 1
+ListScroll.BorderSizePixel = 0
+ListScroll.ScrollBarThickness = 4
+ListScroll.ScrollBarImageColor3 = Color3.fromRGB(0, 220, 130)
+ListScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ListScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+ListScroll.Parent = ListFrame
+
+local ListLayout = Instance.new("UIListLayout")
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ListLayout.Padding = UDim.new(0, 4)
+ListLayout.Parent = ListScroll
+
+local function acharUI()
+    return player:WaitForChild("PlayerGui"):FindFirstChild("EggStealerUI")
+end
+
+local function lerCardsMiranda()
+    local lista = {}
+    local gui = acharUI()
+    if not gui then return lista end
+    local root = gui:FindFirstChild("Root")
+    if not root then return lista end
+    local list = root:FindFirstChild("List")
+    if not list then return lista end
+    for i, card in ipairs(list:GetChildren()) do
+        if card:IsA("TextButton") then
+            local dados = { Card = card }
+            local textos = {}
+            for _, c in ipairs(card:GetDescendants()) do
+                if c:IsA("TextLabel") then
+                    table.insert(textos, c.Text)
+                end
+            end
+            dados.Nome = textos[1]
+            dados.Mult = textos[2]
+            dados.Valor = textos[3]
+            dados.Raridade = textos[4]
+            if dados.Nome then table.insert(lista, dados) end
+        end
+    end
+    return lista
+end
+
+local function clicarBotao(btn)
+    if not btn then return false end
+    if getconnections then
+        for _, c in ipairs(getconnections(btn.MouseButton1Click)) do
+            if c.Function then task.spawn(c.Function) return true end
+        end
+    end
+    if firesignal then
+        pcall(function() firesignal(btn.MouseButton1Click) end)
+        return true
+    end
+    return false
+end
+
+local function acharBotaoMiranda(texto)
+    local gui = acharUI()
+    if not gui then return nil end
+    local root = gui:FindFirstChild("Root")
+    if not root then return nil end
+    for _, b in ipairs(root:GetChildren()) do
+        if b:IsA("TextButton") and b.Text == texto then return b end
+    end
+    return nil
+end
+
+local function getCorRaridade(rar)
+    if not rar then return Color3.fromRGB(200, 200, 200) end
+    local r = rar:lower()
+    if r:find("secret") or r:find("titan") or r:find("divine") then return Color3.fromRGB(255, 100, 100) end
+    if r:find("exotic") or r:find("cosmic") then return Color3.fromRGB(180, 100, 255) end
+    if r:find("mythic") then return Color3.fromRGB(255, 200, 50) end
+    if r:find("legendary") then return Color3.fromRGB(255, 150, 50) end
+    if r:find("epic") then return Color3.fromRGB(200, 80, 200) end
+    if r:find("rare") then return Color3.fromRGB(80, 150, 255) end
+    if r:find("uncommon") then return Color3.fromRGB(80, 200, 100) end
+    return Color3.fromRGB(180, 180, 180)
+end
+
+local linhasAtuais = {}
+local petAlvoNome = nil
+local ativo = false
+
+local function criarLinha(dados)
+    local row = Instance.new("TextButton")
+    row.Size = UDim2.new(1, -4, 0, 46)
+    row.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+    row.BorderSizePixel = 0
+    row.AutoButtonColor = false
+    row.Text = ""
+    row.Parent = ListScroll
+    Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 200, 50)
+    stroke.Thickness = 2
+    stroke.Transparency = 1
+    stroke.Parent = row
+
+    local nm = Instance.new("TextLabel")
+    nm.Size = UDim2.new(0.6, -10, 0, 15)
+    nm.Position = UDim2.new(0, 10, 0, 4)
+    nm.BackgroundTransparency = 1
+    nm.Text = dados.Nome or "?"
+    nm.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nm.Font = Enum.Font.GothamBold
+    nm.TextSize = 12
+    nm.TextXAlignment = Enum.TextXAlignment.Left
+    nm.TextTruncate = Enum.TextTruncate.AtEnd
+    nm.Parent = row
+
+    local vl = Instance.new("TextLabel")
+    vl.Size = UDim2.new(0.4, -10, 0, 15)
+    vl.Position = UDim2.new(0.6, 0, 0, 4)
+    vl.BackgroundTransparency = 1
+    vl.Text = "$" .. (dados.Valor or "?") .. "/s"
+    vl.TextColor3 = Color3.fromRGB(0, 230, 140)
+    vl.Font = Enum.Font.GothamBold
+    vl.TextSize = 11
+    vl.TextXAlignment = Enum.TextXAlignment.Right
+    vl.Parent = row
+
+    local rar = Instance.new("TextLabel")
+    rar.Size = UDim2.new(1, -20, 0, 11)
+    rar.Position = UDim2.new(0, 10, 0, 19)
+    rar.BackgroundTransparency = 1
+    rar.Text = string.upper(dados.Raridade or "?")
+    rar.TextColor3 = getCorRaridade(dados.Raridade)
+    rar.Font = Enum.Font.Gotham
+    rar.TextSize = 9
+    rar.TextXAlignment = Enum.TextXAlignment.Left
+    rar.Parent = row
+
+    local det = Instance.new("TextLabel")
+    det.Size = UDim2.new(1, -20, 0, 13)
+    det.Position = UDim2.new(0, 10, 0, 32)
+    det.BackgroundTransparency = 1
+    det.Text = "Mult: " .. (dados.Mult or "?")
+    det.TextColor3 = Color3.fromRGB(180, 220, 180)
+    det.Font = Enum.Font.Gotham
+    det.TextSize = 9
+    det.TextXAlignment = Enum.TextXAlignment.Left
+    det.Parent = row
+
+    row.MouseButton1Click:Connect(function()
+        for _, l in pairs(linhasAtuais) do
+            if l.Row then
+                l.Row.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+                l.Stroke.Transparency = 1
+            end
+        end
+        row.BackgroundColor3 = Color3.fromRGB(50, 45, 25)
+        stroke.Transparency = 0
+        petAlvoNome = dados.Nome
+        clicarBotao(dados.Card)
+        StatusLabel.Text = "Selecionado"
+        StatusLabel.TextColor3 = Color3.fromRGB(0, 230, 140)
+    end)
+
+    return row, stroke, nm, vl, rar, det
+end
+
+local function refresh()
+    local cards = lerCardsMiranda()
+    local vistos = {}
+    for i, dados in ipairs(cards) do
+        vistos[dados.Card] = true
+        local linha = linhasAtuais[dados.Card]
+        if not linha then
+            local row, stroke, nm, vl, rar, det = criarLinha(dados)
+            linhasAtuais[dados.Card] = { Row = row, Stroke = stroke, Nm = nm, Vl = vl, Rar = rar, Det = det, Data = dados }
+            linha = linhasAtuais[dados.Card]
+        else
+            linha.Data = dados
+            if linha.Nm then linha.Nm.Text = dados.Nome or "?" end
+            if linha.Vl then linha.Vl.Text = "$" .. (dados.Valor or "?") .. "/s" end
+            if linha.Rar then linha.Rar.Text = string.upper(dados.Raridade or "?") end
+            if linha.Det then linha.Det.Text = "Mult: " .. (dados.Mult or "?") end
+        end
+        linha.Row.LayoutOrder = i
+    end
+    for card, linha in pairs(linhasAtuais) do
+        if not vistos[card] then
+            linha.Row:Destroy()
+            linhasAtuais[card] = nil
+            if petAlvoNome == linha.Data.Nome then
+                petAlvoNome = nil
+                StatusLabel.Text = "Alvo saiu do campo"
+                StatusLabel.TextColor3 = Color3.fromRGB(255, 180, 50)
+            end
+        end
+    end
+    local altura = math.clamp(#cards * 50 + 50, 100, 500)
+    ListFrame.Size = UDim2.new(0, 340, 0, altura)
+end
+
+task.spawn(function()
+    while true do
+        if ListFrame.Visible then pcall(refresh) end
+        task.wait(0.3)
+    end
+end)
+
+local function animarSwitch(on)
+    local t = TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    TweenService:Create(SwitchBg, t, {
+        BackgroundColor3 = on and Color3.fromRGB(0, 180, 110) or Color3.fromRGB(50, 50, 65)
+    }):Play()
+    TweenService:Create(SwitchKnob, t, {
+        Position = on and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)
+    }):Play()
+    TweenService:Create(ContainerStroke, t, {
+        Transparency = on and 0 or 0.3,
+        Color = on and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(0, 220, 130)
+    }):Play()
+end
+
+SwitchBg.MouseButton1Click:Connect(function()
+    if not petAlvoNome then
+        StatusLabel.Text = "Escolhe um pet primeiro"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 180, 50)
+        ListFrame.Visible = true
+        pcall(refresh)
+        return
+    end
+    if not ativo then
+        local btn = acharBotaoMiranda("STEAL")
+        if btn then
+            clicarBotao(btn)
+            ativo = true
+            animarSwitch(true)
+            StatusLabel.Text = "Roubando"
+            StatusLabel.TextColor3 = Color3.fromRGB(0, 230, 140)
+        end
+    else
+        local btn = acharBotaoMiranda("STOP")
+        if btn then
+            clicarBotao(btn)
+            ativo = false
+            animarSwitch(false)
+            StatusLabel.Text = "Parado"
+            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end
+    end
+end)
+
+ListBtn.MouseButton1Click:Connect(function()
+    ListFrame.Visible = not ListFrame.Visible
+    if ListFrame.Visible then pcall(refresh) end
+end)
+ListClose.MouseButton1Click:Connect(function()
+    ListFrame.Visible = false
+end)
